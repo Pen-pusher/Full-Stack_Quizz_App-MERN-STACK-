@@ -1,103 +1,93 @@
 const express = require("express");
-const router = express.Router();
 const User = require("../../models/user");
+const jwt = require("jsonwebtoken");
+const auth = require("../../modules/auth");
+const router = express.Router();
 
-// const jwt = require("jsonwebtoken");
-// const auth = require("../../modules/auth");
-// const loggedUser = auth.verifyToken;
 // register user
 
 router.post("/", (req, res, next) => {
-  // console.log(req.body);
-  User.create(req.body).then(user => {
-    res
-      .send({
-        user
-      })
-      .catch(next);
+  User.create(req.body, (err, user) => {
+    if (err) return next(err);
+    if (!user) return res.json({ message: "no user found!", success: false });
+    res.json({ user, success: true });
   });
 });
 
-router.get("/", (req, res, next) => {
-  res.send({
-    type: "GET"
-  });
-});
-router.put("/:id", (req, res, next) => {
-  User.findByIdAndUpdate({ _id: req.params.id }, req.body).then(() => {
-    User.findOne({ _id: req.params.id }).then(user => {
-      res.send(user);
+// login user
+
+router.post("/login", (req, res, next) => {
+  let { email, password } = req.body;
+  User.findOne({ email }, (err, user) => {
+    if (err) return next(err);
+    if (!user) return res.json({ success: false, message: "invalid Email!" });
+    user.verifyPassword(password, (err, matched) => {
+      if (err) return next(err);
+      if (!matched)
+        return res
+          .status(422)
+          .json({ success: false, message: "invalid password" });
+      jwt.sign(
+        {
+          userid: user._id,
+          username: user.username,
+          email: user.email,
+          isadmin: user.isAdmin
+        },
+        "secret",
+        (err, token) => {
+          if (err) return next(err);
+          res.json({ success: true, message: "you are logged in", token });
+        }
+      );
     });
   });
 });
-router.delete("/:id", (req, res, next) => {
-  User.findByIdAndRemove({ _id: req.params.id }).then(user => {
-    res.send(user);
+
+/* GET users listing. */
+
+router.get("/", (req, res, next) => {
+  User.find({}, "-password", (err, users) => {
+    if (err) return next(err);
+    if (!users)
+      return res.json({ success: false, message: "users not found!" });
+    res.json({ users, success: true });
   });
-  // res.send({ type: "DELETE" });
 });
-// // login
-// router.post("/login", (req, res, next) => {
-//   let { email, password } = req.body;
-//   User.findOne({ email }, (err, user) => {
-//     if (err) return next(err);
-//     if (!user) res.json({ success: false, message: "Invalid Email ID" });
-//     user.verifyPassword(password, (err, matched) => {
-//       if (err) return next(err);
-//       if (!matched) res.json({ success: false, message: "invalid password" });
 
-//       //  jwt authentication
+//get a user
 
-//       jwt.sign(
-//         {
-//           userId: user._id,
-//           email: user.email,
-//           username: user.username,
-//
-//         },
-//         "mysecret",
-//         (err, token) => {
-//           if (err) return next(err);
-//           res.json({ success: true, message: "you are logged in", token });
-//         }
-//       );
-//     });
-//   });
-// });
-// ////////////////////////// only current logged user can access //////////////////////
+router.get("/:id", (req, res, next) => {
+  const id = req.params.id;
+  User.findById(id, "-password", (err, user) => {
+    if (err) return next(err);
+    if (!user) res.json({ success: false, message: "no user found!" });
+    res.json({ user, success: true });
+  });
+});
 
-// router.use(loggedUser);
+router.use(auth.verifyToken);
 
-// // get the current user
+// update user
 
-// router.get("/", (req, res, next) => {
-//   let { username } = req.user;
-//   User.findOne({ username }, "-password", (err, user) => {
-//     if (err)
-//       return res.status(422).json({
-//         errors: {
-//           body: "unexpected error!"
-//         }
-//       });
-//     res
-//       .contentType("application/json")
-//       .status(200)
-//       .json(user);
-//   });
-// });
+router.put("/:id", (req, res, next) => {
+  const id = req.params.id;
+  User.findByIdAndUpdate(id, req.body, { new: true }, (err, user) => {
+    if (err) return next(err);
+    if (!user) return res.json({ success: false, message: "user not found!" });
+    res.json({ user, success: true });
+  });
+});
 
-// // update current user
+// delete a user
 
-// router.put("/", (req, res, next) => {
-//   let { username } = req.user;
-//   User.findOneAndUpdate({ username }, req.body, { new: true }, (err, user) => {
-//     if (err) return next(err);
-//     if (!user) return res.status(422).json("User not found!");
-//     res
-//       .contentType("application/json")
-//       .status(200)
-//       .json(user);
-//   });
-// });
+router.delete("/:id", (req, res, next) => {
+  const id = req.params.id;
+  User.findByIdAndDelete(id, (err, user) => {
+    if (err) return next(err);
+    if (!user) return res.json({ success: false, message: "user not found!" });
+    res.json({ user, success: true, message: "succesfully deleted!" });
+  });
+});
 
 module.exports = router;

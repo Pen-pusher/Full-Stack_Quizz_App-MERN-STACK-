@@ -3,13 +3,14 @@ const jwt = require("jsonwebtoken");
 exports.verifyToken = (req, res, next) => {
   let token = req.headers.authorization;
   if (token) {
-    jwt.verify(token, "mysecret", (err, decoded) => {
+    jwt.verify(token, "secret", (err, decoded) => {
       if (err) return next(err);
       req.user = {
-        userId: decoded.userId,
+        userid: decoded.userid,
         email: decoded.email,
         token,
-        username: decoded.username
+        username: decoded.username,
+        isadmin: decoded.isadmin
       };
       next();
     });
