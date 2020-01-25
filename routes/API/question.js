@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Question = require("../../models/question");
 
-//get all quizes
+//get all quizes///////
 
 router.get("/", function(req, res, next) {
   console.log("quiz here");
@@ -13,7 +13,7 @@ router.get("/", function(req, res, next) {
   });
 });
 
-//get single quiz
+//get single quizzes////////////////////
 
 router.get("/:id", (req, res, next) => {
   const id = req.params.id;
@@ -23,7 +23,7 @@ router.get("/:id", (req, res, next) => {
   });
 });
 
-//create quiz
+// create the  quiz/////////////////////
 router.post("/create-quiz", function(req, res, next) {
   console.log(req.body, "inside crate quiz route");
   Quiz.create(req.body, (err, createdQuiz) => {
@@ -37,7 +37,7 @@ router.post("/create-quiz", function(req, res, next) {
   });
 });
 
-//edit quiz
+//edit the  quiz
 
 router.put("/:id", (req, res, next) => {
   let id = req.params.id;
@@ -49,7 +49,7 @@ router.put("/:id", (req, res, next) => {
   });
 });
 
-//delete quiz
+//delete the quiz////////////////////
 
 router.delete("/:id", (req, res, next) => {
   let id = req.params.id;
