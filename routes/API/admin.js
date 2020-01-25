@@ -11,14 +11,14 @@ router.post("/signup", function(req, res, next) {
     if (!admin)
       return res
         .status(401)
-        .json({ message: "No admin found", success: false });
+        .json({ message: "There is no Admin ", success: false });
     return res.status(200).json({ admin, success: true });
   });
 });
 
 //Admin Sign-in
 router.post("/login", function(req, res, next) {
-  console.log(req.body, "inside admin login route");
+  console.log(req.body, "look inside admin login route");
   //   let email = req.body.email
   //   let password = req.body.password
   let { email, password } = req.body;
@@ -35,7 +35,7 @@ router.post("/login", function(req, res, next) {
       "mongo",
       (err, token) => {
         if (err) return next(err);
-        res.status(200).json({ message: "admin is logged in ", success: true });
+        res.status(200).json({ message: "Admin is logged in ", success: true });
       }
     );
   });
