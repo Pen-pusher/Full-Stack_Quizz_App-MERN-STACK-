@@ -8,7 +8,7 @@ router.get("/", function(req, res, next) {
   console.log("quiz here");
   Quiz.find((err, quiz) => {
     if (err) return next(err);
-    if (!quiz) return res.json({ message: "no quiz found", success: false });
+    if (!quiz) return res.json({ message: "no quizes found", success: false });
     res.json({ quiz, success: true });
   });
 });
@@ -25,7 +25,7 @@ router.get("/:id", (req, res, next) => {
 
 // create the  quiz/////////////////////
 router.post("/create-quiz", function(req, res, next) {
-  console.log(req.body, "inside crate quiz route");
+  console.log(req.body, "inside the create quiz route");
   Quiz.create(req.body, (err, createdQuiz) => {
     if (err) return next(err);
     if (!createdQuiz)
@@ -44,7 +44,7 @@ router.put("/:id", (req, res, next) => {
   Quiz.findByIdAndUpdate(id, req.body, (err, editedQuiz) => {
     if (err) return next(err);
     if (!editedQuiz)
-      return res.status(400).json({ message: "no quiz found", success: false });
+      return res.status(400).json({ message: "No quizes found", success: false });
     res.status(200).json({ editedQuiz, success: true });
   });
 });
@@ -57,7 +57,7 @@ router.delete("/:id", (req, res, next) => {
     console.log(deleteQuiz, "delete item");
     if (err) return next(err);
     if (!deleteQuiz)
-      return res.status(400).json({ message: "no quiz found", success: false });
+      return res.status(400).json({ message: "No quizes found", success: false });
     if (deleteQuiz) return res.status(200).json({ deleteQuiz, success: true });
   });
 });
